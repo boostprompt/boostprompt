@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="Boosting Prompting Mechanisms for Zero-Shot Speech Synthesis">
+  <meta name="keywords" content="Nerfies, D-NeRF, NeRF">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Boosting Prompting Mechanisms for Zero-Shot Speech Synthesis</title>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-L7749G0HJZ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-L7749G0HJZ');
+</script>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+</head>
+<body>
+
+<section class="hero">
+  <div class="hero-body" style="padding-bottom: 24px;">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">Boosting Prompting Mechanisms for Zero-Shot Speech Synthesis</h1>
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">
+              <a href="#">Anonymous authors</a></span>
+          </div>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block">Paper under double-blind review</span>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+<section class="section" style="padding-top: 0px;">
+  <div class="container is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            Zero-shot text-to-speech (TTS) aims to synthesize voices with unseen speech prompts, which significantly reduces the data and computation requirements for voice cloning by skipping the fine-tuning process. However, the prompting mechanisms of zero-shot TTS still face challenges in the following aspects: 
+            1) previous works of zero-shot TTS are typically trained with single-sentence prompts, which significantly restricts their performance when the data is relatively sufficient during the inference stage.
+            2) The prosodic information in prompts is highly coupled with timbre, making it untransferable to each other.
+            This paper introduces Mega-TTS, a generic prompting mechanism for zero-shot TTS, to tackle the aforementioned challenges. Specifically, we design a powerful acoustic autoencoder that separately encodes the prosody and timbre information into the compressed latent space while providing high-quality reconstructions. Then, we propose a multi-reference timbre encoder and a prosody latent language model (P-LLM) to extract useful information from multi-sentence prompts. We further leverage the probabilities derived from multiple P-LLM outputs to produce transferable and controllable prosody. 
+            Experimental results demonstrate that Mega-TTS could not only synthesize identity-preserving speech with a short prompt of an unseen speaker from arbitrary sources but consistently outperform the fine-tuning method when the volume of data ranges from 10 seconds to 5 minutes. Furthermore, our method enables to transfer various speaking styles to the target timbre in a fine-grained and controlled manner. Audio samples can be found in this demo page.
+          </p>
+        </div>
+
+      </div>
+    </div>
+    <!--/ Abstract. -->
+
+  </div>
+</section>
+
+
+
+<section class="hero teaser">
+  <div class="container is-max-desktop is-centered has-text-centered">
+    <div class="hero-body">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">Model Overview</h2>
+          <img src="./static/images/model_overview.png"
+                    class="interpolation-image"
+                    alt="Interpolate start reference image."/>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<section class="hero is-light is-small">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column">
+          <h2 class="title is-3">Zero-shot Text-to-Speech (Section 4.2)</h2>
+          <div class="content">
+            <p>
+              We list the speech examples used in our subjective evaluations here.
+            </p>
+            <h6 style="margin-top: 50px;">
+              <span class="icon"><i class="fas fa-battery-quarter"></i></span> In the following part, all of the systems have <u>10 seconds</u> of data available for each speaker.
+            </h6>
+          </div>
+        </div>
+      </div>
+      <div class="columns is-centered has-text-centered  is-full-width">
+        <table class="table" style="background-color: transparent;">
+          <thead>
+            <tr>
+              <th align="center" width="80%"><strong><span class="icon"><i class="fas fa-file-alt"></i></span>Target Text</strong></th>
+              <th align="center" width="30%"><strong>Prompt Example</strong></th>
+              <th align="center" width="30%"><strong>GT</strong></th>
+              <th align="center" width="30%"><strong>VALL-E</strong></th>
+              <th align="center" width="30%"><strong>Fine-tune</strong></th>
+              <th align="center" width="30%"><strong>Ours</strong></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="text-align: center;"><p>It is true that the horses are here, but the Hurons are gone; let us, then, hunt for the path by which they parted.</p></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/prompt/3.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/gt/3.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/valle-10s/3.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/finetune-10s/3.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/mega-tts-10s/3.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;"><p>If I must say it, mother, I want to go away, and get out of this dead level.</p></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/prompt/6.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/gt/6.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/valle-10s/6.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/finetune-10s/6.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/mega-tts-10s/6.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;"><p>The first mill plant was placed in the woollen factory of james Harrison at Newburgh, New York, about september fifteenth eighteen eighty one.</p></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/prompt/1.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/gt/1.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/valle-10s/1.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/finetune-10s/1.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/mega-tts-10s/1.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;"><p>There their sad condition evoked for a time general commiseration.</p></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/prompt/2.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/gt/2.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/valle-10s/2.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/finetune-10s/2.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/mega-tts-10s/2.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;"><p>Now in this of Burne Jones, the landscape is clearly full of light everywhere, color or glass light: that is, the outline is prepared for modification of color only.</p></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/prompt/4.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/gt/4.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/valle-10s/4.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/finetune-10s/4.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/mega-tts-10s/4.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;"><p>When they entered the stage box on the left the first act was well under way, the scene being the interior of a cabin in the south of Ireland.</p></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/prompt/5.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/gt/5.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/valle-10s/5.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/finetune-10s/5.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/mega-tts-10s/5.wav" type="audio/wav"></audio></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="columns is-centered has-text-centered" style="margin-top: 50px;">
+        <div class="column">
+          <div class="content">
+            <h6>
+              <span class="icon"><i class="fas fa-battery-quarter"></i></span> In the following part, all of the systems have <u>60 seconds</u> of data available for each speaker.
+            </h6>
+            <p>
+              <i>(VALL-E fails to generate reasonable speeches
+              with prompts longer than 20 seconds in our experiments and is also out of memory with 60-second prompts.)</i>
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="columns is-centered has-text-centered  is-full-width">
+        <table class="table" style="background-color: transparent;">
+          <thead>
+            <tr>
+              <th align="center" width="80%"><strong><span class="icon"><i class="fas fa-file-alt"></i></span>Target Text</strong></th>
+              <th align="center" width="30%"><strong>Prompt Example</strong></th>
+              <th align="center" width="30%"><strong>GT</strong></th>
+              <th align="center" width="30%"><strong>VALL-E (20s)</strong></th>
+              <th align="center" width="30%"><strong>Fine-tune</strong></th>
+              <th align="center" width="30%"><strong>Ours</strong></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="text-align: center;"><p>It is true that the horses are here, but the Hurons are gone; let us, then, hunt for the path by which they parted.</p></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/prompt/3.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/gt/3.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/valle-20s/3.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/finetune-60s/3.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/mega-tts-60s/3.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;"><p>If I must say it, mother, I want to go away, and get out of this dead level.</p></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/prompt/6.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/gt/6.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/valle-20s/6.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/finetune-60s/6.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/mega-tts-60s/6.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;"><p>The first mill plant was placed in the woollen factory of james Harrison at Newburgh, New York, about september fifteenth eighteen eighty one.</p></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/prompt/1.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/gt/1.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/valle-20s/1.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/finetune-60s/1.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/mega-tts-60s/1.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;"><p>There their sad condition evoked for a time general commiseration.</p></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/prompt/2.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/gt/2.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/valle-20s/2.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/finetune-60s/2.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/mega-tts-60s/2.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;"><p>Now in this of Burne Jones, the landscape is clearly full of light everywhere, color or glass light: that is, the outline is prepared for modification of color only.</p></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/prompt/4.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/gt/4.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/valle-20s/4.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/finetune-60s/4.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/mega-tts-60s/4.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;"><p>When they entered the stage box on the left the first act was well under way, the scene being the interior of a cabin in the south of Ireland.</p></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/prompt/5.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/gt/5.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/valle-20s/5.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/finetune-60s/5.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/mega-tts-60s/5.wav" type="audio/wav"></audio></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="columns is-centered has-text-centered" style="margin-top: 50px;">
+        <div class="column">
+          <div class="content">
+            <h6>
+              <span class="icon"><i class="fas fa-battery-quarter"></i></span> In the following part, all of the systems have <u>300 seconds</u> of data available for each speaker.
+            </h6>
+          </div>
+        </div>
+      </div>
+      <div class="columns is-centered has-text-centered  is-full-width">
+        <table class="table" style="background-color: transparent;">
+          <thead>
+            <tr>
+              <th align="center" width="80%"><strong><span class="icon"><i class="fas fa-file-alt"></i></span>Target Text</strong></th>
+              <th align="center" width="30%"><strong>Prompt Example</strong></th>
+              <th align="center" width="30%"><strong>GT</strong></th>
+              <th align="center" width="30%"><strong>Fine-tune</strong></th>
+              <th align="center" width="30%"><strong>Ours</strong></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="text-align: center;"><p>It is true that the horses are here, but the Hurons are gone; let us, then, hunt for the path by which they parted.</p></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/prompt/3.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/gt/3.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/finetune-300s/3.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/mega-tts-300s/3.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;"><p>If I must say it, mother, I want to go away, and get out of this dead level.</p></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/prompt/6.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/gt/6.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/finetune-300s/6.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/mega-tts-300s/6.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;"><p>The first mill plant was placed in the woollen factory of james Harrison at Newburgh, New York, about september fifteenth eighteen eighty one.</p></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/prompt/1.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/gt/1.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/finetune-300s/1.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/mega-tts-300s/1.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;"><p>There their sad condition evoked for a time general commiseration.</p></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/prompt/2.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/gt/2.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/finetune-300s/2.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/mega-tts-300s/2.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;"><p>Now in this of Burne Jones, the landscape is clearly full of light everywhere, color or glass light: that is, the outline is prepared for modification of color only.</p></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/prompt/4.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/gt/4.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/finetune-300s/4.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/mega-tts-300s/4.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;"><p>When they entered the stage box on the left the first act was well under way, the scene being the interior of a cabin in the south of Ireland.</p></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/prompt/5.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/gt/5.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/finetune-300s/5.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/mega-tts-300s/5.wav" type="audio/wav"></audio></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="columns is-centered has-text-centered" style="margin-top: 50px;">
+        <div class="column">
+          <div class="content">
+            <h6>
+              (Supplementary Results)
+            </h6>
+            <h6>
+              Here, we conduct long-form zero-shot TTS experiments. All of the systems have <u>10 seconds</u> of data.
+            </h6>
+          </div>
+        </div>
+      </div>
+      <div class="columns is-centered has-text-centered  is-full-width">
+        <table class="table" style="background-color: transparent;">
+          <thead>
+            <tr>
+              <th align="center" width="80%"><strong><span class="icon"><i class="fas fa-file-alt"></i></span>Target Text</strong></th>
+              <th align="center" width="30%"><strong>Prompt Example</strong></th>
+              <th align="center" width="30%"><strong>VALL-E</strong></th>
+              <th align="center" width="30%"><strong>Fine-tune</strong></th>
+              <th align="center" width="30%"><strong>Ours</strong></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td rowspan="2" style="text-align: center;">
+                <p>
+                  Dig anywhere in Pompeii and you'll uncover an ancient treasure, a snapshot of a lost Roman world. Most of those who lived in the city probably escaped the eruption of Mount Vesuvius, but what they left behind is still being unearthed 2,000 years later.
+                The new discoveries from this excavation include a huge oven, capable of producing 100 loaves a day, a shrine to make offerings to the gods that's decorated with snakes, and a bed reduced to ashes in a fire. There are skeletons too – three individuals crushed under falling masonry.
+                The archaeologists plan to erect a walkway, so tourists can see what's going on. It will prove popular. This is the dig that recently revealed a fresco, depicting a bread meal that looked like it might be a forerunner of pizza.
+                </p>
+              </td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/prompt/3.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/valle-long-form/1.wav" type="audio/wav"></audio>(Failed)</td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/finetune-10s-long-form/1.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/mega-tts-long-form/1.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;border-bottom-width: 1px;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/prompt/5.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;border-bottom-width: 1px;">(Failed)</td>
+              <td style="text-align: center;border-bottom-width: 1px;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/finetune-10s-long-form/2.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;border-bottom-width: 1px;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/mega-tts-long-form/2.wav" type="audio/wav"></audio></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+
+      <div class="columns is-centered has-text-centered" style="margin-top: 50px;">
+        <div class="column">
+          <div class="content">
+            <h6>
+              (Additional Examples)
+            </h6>
+            <h6>
+              Here, we perform voice cloning for classic anime characters.
+            </h6>
+          </div>
+        </div>
+      </div>
+      <div class="columns is-centered has-text-centered  is-full-width">
+        <table class="table" style="background-color: transparent;">
+          <thead>
+            <tr>
+              <th align="center" width="80%"><strong><span class="icon"><i class="fas fa-file-alt"></i></span>Target Text</strong></th>
+              <th align="center" width="80%"><strong>Name</strong></th>
+              <th align="center" width="30%"><strong>Prompt</strong></th>
+              <th align="center" width="30%"><strong>Ours</strong></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="text-align: center;"><p>Let's go drink until we can't feel feelings anymore.</p></td>
+              <td style="text-align: center;"><p>Sponge Bob</p></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/anime-character/3_spongebob_gt.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/anime-character/3_spongbob.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;border-bottom-width: 1px;"><p>Uh, it's not like the internet to go crazy about something small and stupid.</p></td>
+              <td style="text-align: center;border-bottom-width: 1px;"><p>Peter Griffin</p></td>
+              <td style="text-align: center;border-bottom-width: 1px;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/anime-character/3_petergriffin_gt.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;border-bottom-width: 1px;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/anime-character/3_petergriffin.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;border-bottom-width: 1px;"><p>Then I would never talk to that person about boa constrictors, or primeval forests, or stars. I would bring myself down to his level. </p></td>
+              <td style="text-align: center;border-bottom-width: 1px;"><p>Rick</p></td>
+              <td style="text-align: center;border-bottom-width: 1px;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/anime-character/3_rick_gt.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;border-bottom-width: 1px;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/anime-character/3_rick.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;border-bottom-width: 1px;"><p>In what a disgraceful light might it not strike so vain a man!  </p></td>
+              <td style="text-align: center;border-bottom-width: 1px;"><p>Morty</p></td>
+              <td style="text-align: center;border-bottom-width: 1px;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/anime-character/3_morty_gt.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;border-bottom-width: 1px;"><audio controls="" ><source src="static/audio_sample/zero-shot_TTS/anime-character/3_morty.wav" type="audio/wav"></audio></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+    </div>
+  </div>
+</section>
+
+
+
+
+<section class="hero is-small">
+  <div class="hero-body">
+    <div class="container">
+      <div class="columns is-centered has-text-centered">
+        <div class="column is-four-fifths">
+          <h2 class="title is-3">Prosody Transfer (Section 4.3)</h2>
+          <div class="content">
+            <p>
+              We list the speech examples used in our subjective evaluations here.
+            </p>
+            <p>
+              &gamma; is the tempereture of the proposed prosody interpolation technique. (Section 3.4) 
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="columns is-centered has-text-centered">
+        <table class="table" style="background-color: transparent;">
+          <thead>
+            <tr>
+              <th width="28%" align="center"><strong><span class="icon"><i class="fas fa-file-alt"></i></span>Target Text</strong></th>
+              <th width="15%" align="center"><strong>Source Speech</strong></th>
+              <th width="15%" align="center"><strong>Prosody Reference</strong></th>
+              <th width="15%" align="center"><strong>Daft-Exprt</strong></th>
+              <th width="15%" align="center"><strong>Ours</strong></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="text-align: center;">You have the right to abandon me, and I have the capital to make you regret.</td>
+              <td style="text-align: center;" ><audio controls="" ><source src="static/audio_sample/prosody_transfer/3_gt.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;" ><audio controls="" ><source src="static/audio_sample/prosody_transfer/3_ref.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;" ><audio controls="" ><source src="static/audio_sample/prosody_transfer/3_after_daft.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;" ><audio controls="" ><source src="static/audio_sample/prosody_transfer/3_after.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;">My heart aches with sadness and tears stream down my face.</td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/prosody_transfer/4_gt.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/prosody_transfer/4_ref.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/prosody_transfer/4_after_daft.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/prosody_transfer/4_after.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;">She bounced into the classroom, full of the joys of spring.</td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/prosody_transfer/1_gt.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/prosody_transfer/1_ref.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/prosody_transfer/1_after_daft.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/prosody_transfer/1_after.wav" type="audio/wav"></audio></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="columns is-centered has-text-centered" style="margin-top: 50px;">
+        <div class="column">
+          <div class="content">
+            <h6>
+              (Additional Examples)
+            </h6>
+            <h6>
+              Some interesting applications for zero-shot prosody transfer.
+            </h6>
+          </div>
+        </div>
+      </div>
+      <div class="columns is-centered has-text-centered">
+        <table class="table" style="background-color: transparent;">
+          <thead>
+            <tr>
+              <th width="16%" align="center"><strong><span class="icon"><i class="fas fa-magic"></i></span>Setting</strong></th>
+              <th width="16%" align="center"><strong>Source Speech</strong></th>
+              <th width="16%" align="center"><strong>Prosody Reference</strong></th>
+              <th width="16%" align="center"><strong>Generated Examples</strong></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td width="28%" style="text-align: center;"><p>Start rapping!</p></td>
+              <td width="20%" style="text-align: center;"><audio controls="" ><source src="static/audio_sample/additional/1_gt.wav" type="audio/wav"></audio></td>
+              <td width="20%" style="text-align: center;"><audio controls="" ><source src="static/audio_sample/additional/1_ref.wav" type="audio/wav"></audio></td>
+              <td width="12%" style="text-align: center;"><audio controls="" ><source src="static/audio_sample/additional/1_rap.wav" type="audio/wav"></audio><audio controls="" ><source src="static/audio_sample/additional/1_rap2.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td width="28%" style="text-align: center;"><p>News broadcast</p></td>
+              <td width="20%" style="text-align: center;"><audio controls="" ><source src="static/audio_sample/additional/2_gt.wav" type="audio/wav"></audio></td>
+              <td width="20%" style="text-align: center;"><audio controls="" ><source src="static/audio_sample/additional/2_ref.wav" type="audio/wav"></audio></td>
+              <td width="12%" style="text-align: center;"><audio controls="" ><source src="static/audio_sample/additional/2_news.wav" type="audio/wav"></audio><audio controls="" ><source src="static/audio_sample/additional/2_news2.wav" type="audio/wav"></audio></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+<section class="hero is-light is-small">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered has-text-centered">
+        <div class="column">
+          <h2 class="title is-3">Additional Examples for Rebuttal</h2>
+        </div>
+      </div>
+
+
+      <div class="columns is-centered has-text-centered" style="margin-top: 50px;">
+        <div class="column">
+          <div class="content">
+            <h6>
+              Noisy Reference Prompts
+            </h6>
+          </div>
+        </div>
+      </div>
+      <div class="columns is-centered has-text-centered  is-full-width">
+        <table class="table" style="background-color: transparent;">
+          <thead>
+            <tr>
+              <th align="center" width="80%"><strong><span class="icon"><i class="fas fa-file-alt"></i></span>Target Text</strong></th>
+              <th align="center" width="30%"><strong>Prompt</strong></th>
+              <th align="center" width="30%"><strong>GT</strong></th>
+              <th align="center" width="30%"><strong>VALL-E</strong></th>
+              <th align="center" width="30%"><strong>Ours</strong></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="text-align: center;"><p>The old king went out and fought bravely, but at last his sword broke, and he was wounded and his men fled.</p></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/noisy_env/prompt_1.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/noisy_env/gt_1.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/noisy_env/valle_1.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/noisy_env/gen_1.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;border-bottom-width: 1px;"><p>Dampness was invading it, the flowers were deserting it.</p></td>
+              <td style="text-align: center;border-bottom-width: 1px;"><audio controls="" ><source src="static/audio_sample/noisy_env/prompt_2.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;border-bottom-width: 1px;"><audio controls="" ><source src="static/audio_sample/noisy_env/gt_2.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;border-bottom-width: 1px;"><audio controls="" ><source src="static/audio_sample/noisy_env/valle_2.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;border-bottom-width: 1px;"><audio controls="" ><source src="static/audio_sample/noisy_env/gen_2.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;border-bottom-width: 1px;"><p>Captain Blizzard's round pink face creased in his winning smile</p></td>
+              <td style="text-align: center;border-bottom-width: 1px;"><audio controls="" ><source src="static/audio_sample/noisy_env/prompt_3.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;border-bottom-width: 1px;"><audio controls="" ><source src="static/audio_sample/noisy_env/gt_3.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;border-bottom-width: 1px;"><audio controls="" ><source src="static/audio_sample/noisy_env/valle_3.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;border-bottom-width: 1px;"><audio controls="" ><source src="static/audio_sample/noisy_env/gen_3.wav" type="audio/wav"></audio></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+
+      <div class="columns is-centered has-text-centered" style="margin-top: 50px;">
+        <div class="column">
+          <div class="content">
+            <h6>
+              Non-standard Speech Prompts
+            </h6>
+          </div>
+        </div>
+      </div>
+      <div class="columns is-centered has-text-centered">
+        <table class="table" style="background-color: transparent;">
+          <thead>
+            <tr>
+              <th width="16%" align="center"><strong>Type of Prompt</strong></th>
+              <th width="16%" align="center"><strong>Speech Prompt</strong></th>
+              <th width="16%" align="center"><strong>Generated Examples</strong></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td width="28%" style="text-align: center;"><p>Laughing</p></td>
+              <td width="20%" style="text-align: center;"><audio controls="" ><source src="static/audio_sample/non_speech/man-laugh_gt.wav" type="audio/wav"></audio></td>
+              <td width="20%" style="text-align: center;"><audio controls="" ><source src="static/audio_sample/non_speech/man-laugh_1.wav" type="audio/wav"></audio><audio controls="" ><source src="static/audio_sample/non_speech/man-laugh_2.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td width="28%" style="text-align: center;"><p>Crying</p></td>
+              <td width="20%" style="text-align: center;"><audio controls="" ><source src="static/audio_sample/non_speech/woman-cry_gt.wav" type="audio/wav"></audio></td>
+              <td width="20%" style="text-align: center;"><audio controls="" ><source src="static/audio_sample/non_speech/woman-cry_1.wav" type="audio/wav"></audio><audio controls="" ><source src="static/audio_sample/non_speech/woman-cry_2.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td width="28%" style="text-align: center;border-bottom-width: 1px;"><p>Cheering</p></td>
+              <td width="20%" style="text-align: center;border-bottom-width: 1px;"><audio controls="" ><source src="static/audio_sample/non_speech/man-huhu_gt.wav" type="audio/wav"></audio></td>
+              <td width="20%" style="text-align: center;border-bottom-width: 1px;"><audio controls="" ><source src="static/audio_sample/non_speech/man-huhu_1.wav" type="audio/wav"></audio><audio controls="" ><source src="static/audio_sample/non_speech/man-huhu_2.wav" type="audio/wav"></audio></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+
+      <div class="columns is-centered has-text-centered" style="margin-top: 50px;">
+        <div class="column">
+          <div class="content">
+            <h6>
+              Chinese Examples
+            </h6>
+          </div>
+        </div>
+      </div>
+      <div class="columns is-centered has-text-centered  is-full-width">
+        <table class="table" style="background-color: transparent;">
+          <thead>
+            <tr>
+              <th align="center" width="80%"><strong><span class="icon"><i class="fas fa-file-alt"></i></span>Target Text</strong></th>
+              <th align="center" width="30%"><strong>Prompt</strong></th>
+              <th align="center" width="30%"><strong>Ours</strong></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="text-align: center;"><p>非常抱歉，也就是想了解一下您有多大的可能会将我们的广告服务推荐给其他人？</p></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/multilingual/gt_1.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/multilingual/gen_1.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;border-bottom-width: 1px;"><p>是这样的，这个数学冲刺营是给体验学员的福利，三节课都是免费的。</p></td>
+              <td style="text-align: center;border-bottom-width: 1px;"><audio controls="" ><source src="static/audio_sample/multilingual/gt_2.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;border-bottom-width: 1px;"><audio controls="" ><source src="static/audio_sample/multilingual/gen_2.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;border-bottom-width: 1px;"><p>你好，是我，我有一个小游戏哦，你想和我一起玩吗？</p></td>
+              <td style="text-align: center;border-bottom-width: 1px;"><audio controls="" ><source src="static/audio_sample/multilingual/gt_3.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;border-bottom-width: 1px;"><audio controls="" ><source src="static/audio_sample/multilingual/gen_3.wav" type="audio/wav"></audio></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+
+      <div class="columns is-centered has-text-centered" style="margin-top: 50px;">
+        <div class="column">
+          <div class="content">
+            <h6>
+              Cross-lingual Examples (Chinese -> English)
+            </h6>
+          </div>
+        </div>
+      </div>
+      <div class="columns is-centered has-text-centered  is-full-width">
+        <table class="table" style="background-color: transparent;">
+          <thead>
+            <tr>
+              <th align="center" width="80%"><strong><span class="icon"><i class="fas fa-file-alt"></i></span>Target Text</strong></th>
+              <th align="center" width="30%"><strong>Prompt</strong></th>
+              <th align="center" width="30%"><strong>Ours</strong></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="text-align: center;"><p>He was received with great enthusiasm by the employer, who congratulated him on possessing so valuable a slave.</p></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/multilingual/gt_4.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;"><audio controls="" ><source src="static/audio_sample/multilingual/gen_4.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;border-bottom-width: 1px;"><p>He simply stared at her fixedly with that peculiar expression on his face.</p></td>
+              <td style="text-align: center;border-bottom-width: 1px;"><audio controls="" ><source src="static/audio_sample/multilingual/gt_5.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;border-bottom-width: 1px;"><audio controls="" ><source src="static/audio_sample/multilingual/gen_5.wav" type="audio/wav"></audio></td>
+            </tr>
+            <tr>
+              <td style="text-align: center;border-bottom-width: 1px;"><p>The little prince also pulled up, with a certain sense of dejection, the last little shoots of the baobabs.</p></td>
+              <td style="text-align: center;border-bottom-width: 1px;"><audio controls="" ><source src="static/audio_sample/multilingual/gt_6.wav" type="audio/wav"></audio></td>
+              <td style="text-align: center;border-bottom-width: 1px;"><audio controls="" ><source src="static/audio_sample/multilingual/gen_6.wav" type="audio/wav"></audio></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      
+    </div>
+  </div>
+</section>
+
+
+
+<footer class="footer">
+  <div class="container">
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Licenses</h2>
+        <div class="content">
+          <p>
+            This website is licensed under a <a rel="license"
+                                                href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+            Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+          <p>
+            Website source code based on the <a
+            href="https://github.com/nerfies/nerfies.github.io">Nerfies</a> project page.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
